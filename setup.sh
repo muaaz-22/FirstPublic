@@ -69,15 +69,16 @@ function downloadLibVpx() {
 
 function downloadMbedTLS() {
     pushd $SOURCES_DIR
-    echo "Cloning mbedtls source code of version $MBEDTLS_VERSION..."
+    echo "Downloading mbedTLS version $MBEDTLS_VERSION..."
 
     # Remove old folder if exists
     [ -d mbedtls-$MBEDTLS_VERSION ] && rm -rf mbedtls-$MBEDTLS_VERSION
 
+    # Use git clone for 3.6.x and above
     git clone --branch mbedtls-$MBEDTLS_VERSION https://github.com/ARMmbed/mbedtls.git mbedtls-$MBEDTLS_VERSION
 
     if [ ! -d "mbedtls-$MBEDTLS_VERSION" ]; then
-        echo "Failed to clone mbedtls-$MBEDTLS_VERSION. Exiting..."
+        echo "Failed to clone mbedTLS-$MBEDTLS_VERSION. Exiting..."
         exit 1
     fi
     popd
@@ -140,6 +141,8 @@ function buildLibVpx() {
       --enable-vp9 \
       --enable-static \
       --disable-shared \
+      --disable-unit-tests \
+      --disable-tools \
       --disable-examples \
       --disable-docs \
       --enable-realtime-only \
@@ -159,9 +162,11 @@ function buildLibVpx() {
 }
 
 function buildMbedTLS() {
-    # Ensure MBEDTLS_DIR is a git clone of 3.6.4
+    MBEDTLS_DIR=$SOURCES_DIR/mbedtls-$MBEDTLS_VERSION
+
+    # Check git clone exists
     if [ ! -d "$MBEDTLS_DIR/.git" ]; then
-        echo "ERROR: $MBEDTLS_DIR must be a git clone of mbedTLS 3.6.4"
+        echo "ERROR: $MBEDTLS_DIR must be a git clone of mbedTLS-$MBEDTLS_VERSION"
         return 1
     fi
 
