@@ -163,13 +163,24 @@ function buildMbedTLS() {
       mkdir -p ${CMAKE_BUILD_DIR}
       cd ${CMAKE_BUILD_DIR}
 
+      
+        # Enable AES on arm64-v8a only
+        EXTRA_CFLAGS=""
+        if [ "$ABI" == "arm64-v8a" ]; then
+            EXTRA_CFLAGS="-march=armv8-a+crypto"
+        fi
+
+        # Suppress documentation warnings being treated as errors
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -Wno-error=documentation"
+
       ${CMAKE_EXECUTABLE} .. \
        -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
        -DANDROID_ABI=$ABI \
        -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake \
        -DCMAKE_INSTALL_PREFIX=$BUILD_DIR/external/$ABI \
        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384" \
-       -DENABLE_TESTING=0
+       -DENABLE_TESTING=0 \
+       -DCMAKE_C_FLAGS="$EXTRA_CFLAGS"
 
       make -j$JOBS
       make install
@@ -299,6 +310,6 @@ if [[ ! -d "$OUTPUT_DIR" && ! -d "$BUILD_DIR" ]]; then
 
   # Building library
   buildMbedTLS
-  buildLibVpx
-  buildFfmpeg
+  #buildLibVpx
+  #buildFfmpeg
 fi
