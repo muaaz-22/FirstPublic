@@ -170,8 +170,8 @@ function buildMbedTLS() {
        -DCMAKE_INSTALL_PREFIX=$BUILD_DIR/external/$ABI \
        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384" \
        -DENABLE_TESTING=0 \
-       -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-documentation -Wno-error" \
-       -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-documentation -Wno-error"
+       -DCMAKE_C_FLAGS="-Wno-error=documentation" \
+       -DCMAKE_CXX_FLAGS="-Wno-error=documentation"
 
       make -j$JOBS
       make install
