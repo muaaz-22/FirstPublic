@@ -68,14 +68,19 @@ function downloadLibVpx() {
 }
 
 function downloadMbedTLS() {
-  pushd $SOURCES_DIR
-  echo "Downloading mbedtls source code of version $MBEDTLS_VERSION..."
-  MBEDTLS_FILE=mbedtls-$MBEDTLS_VERSION.tar.gz
-  curl -L "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v${MBEDTLS_VERSION}.tar.gz" -o $MBEDTLS_FILE
-  [ -e $MBEDTLS_FILE ] || { echo "$MBEDTLS_FILE does not exist. Exiting..."; exit 1; }
-  tar -zxf $MBEDTLS_FILE
-  rm $MBEDTLS_FILE
-  popd
+    pushd $SOURCES_DIR
+    echo "Cloning mbedtls source code of version $MBEDTLS_VERSION..."
+
+    # Remove old folder if exists
+    [ -d mbedtls-$MBEDTLS_VERSION ] && rm -rf mbedtls-$MBEDTLS_VERSION
+
+    git clone --branch mbedtls-$MBEDTLS_VERSION https://github.com/ARMmbed/mbedtls.git mbedtls-$MBEDTLS_VERSION
+
+    if [ ! -d "mbedtls-$MBEDTLS_VERSION" ]; then
+        echo "Failed to clone mbedtls-$MBEDTLS_VERSION. Exiting..."
+        exit 1
+    fi
+    popd
 }
 
 function downloadFfmpeg() {
@@ -154,6 +159,12 @@ function buildLibVpx() {
 }
 
 function buildMbedTLS() {
+    # Ensure MBEDTLS_DIR is a git clone of 3.6.4
+    if [ ! -d "$MBEDTLS_DIR/.git" ]; then
+        echo "ERROR: $MBEDTLS_DIR must be a git clone of mbedTLS 3.6.4"
+        return 1
+    fi
+
     pushd $MBEDTLS_DIR
 
     for ABI in $ANDROID_ABIS; do
@@ -162,24 +173,18 @@ function buildMbedTLS() {
         mkdir -p ${CMAKE_BUILD_DIR}
         cd ${CMAKE_BUILD_DIR}
 
-        # Enable AES on arm64-v8a only
-        EXTRA_CFLAGS=""
-        if [ "$ABI" == "arm64-v8a" ]; then
-            EXTRA_CFLAGS="-march=armv8-a+crypto"
-        fi
-
-        # Suppress documentation warnings being treated as errors
-        EXTRA_CFLAGS="$EXTRA_CFLAGS -Wno-error=documentation"
-
+        # Configure CMake for Android NDK
         ${CMAKE_EXECUTABLE} .. \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
             -DANDROID_ABI=$ABI \
             -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake \
             -DCMAKE_INSTALL_PREFIX=$BUILD_DIR/external/$ABI \
             -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384" \
-            -DENABLE_TESTING=0 \
-            -DCMAKE_C_FLAGS="$EXTRA_CFLAGS"
+            -DCMAKE_C_FLAGS="-Wno-documentation -Wno-error=documentation" \
+            -DCMAKE_CXX_FLAGS="-Wno-documentation -Wno-error=documentation" \
+            -DENABLE_TESTING=0
 
+        # Build and install
         make -j$JOBS
         make install
     done
