@@ -287,18 +287,18 @@ if [[ ! -d "$OUTPUT_DIR" && ! -d "$BUILD_DIR" ]]; then
     downloadMbedTLS
   fi
 
-  # Download Vpx source code if it doesn't exist
-  if [[ ! -d "$VPX_DIR" ]]; then
-    downloadLibVpx
-  fi
+  # # Download Vpx source code if it doesn't exist
+  # if [[ ! -d "$VPX_DIR" ]]; then
+  #   downloadLibVpx
+  # fi
 
-  # Download Ffmpeg source code if it doesn't exist
-  if [[ ! -d "$FFMPEG_DIR" ]]; then
-    downloadFfmpeg
-  fi
+  # # Download Ffmpeg source code if it doesn't exist
+  # if [[ ! -d "$FFMPEG_DIR" ]]; then
+  #   downloadFfmpeg
+  # fi
 
   # Building library
   buildMbedTLS
-  buildLibVpx
-  buildFfmpeg
+  #buildLibVpx
+  #buildFfmpeg
 fi
