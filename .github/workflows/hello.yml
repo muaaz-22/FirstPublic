@@ -34,11 +34,14 @@ jobs:
       - name: Install Automake
         run: sudo apt-get install -y automake
 
+      - name: Install Curl
+        run: sudo apt-get install -y curl
+
+      - name: Install Unzip
+        run: sudo apt-get install -y unzip
+
       - name: Install Build-essential
         run: sudo apt-get install -y build-essential
-
-      - name: Install CMake
-        run: sudo apt-get install -y cmake
 
       - name: Install Pkg-config
         run: sudo apt-get install -y pkg-config
@@ -82,3 +85,14 @@ jobs:
 
       - name: Show CMake path
         run: echo "CMake $ANDROID_CMAKE_VERSION is at $ANDROID_SDK_HOME/cmake/$ANDROID_CMAKE_VERSION/bin"
+
+      - name: Run setup.sh
+        run: |
+          chmod +x setup.sh
+          ./setup.sh
+
+      - name: Upload FFmpeg libraries as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ffmpeg-libs
+          path: output/
