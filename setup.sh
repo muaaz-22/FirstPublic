@@ -157,26 +157,33 @@ function buildMbedTLS() {
     pushd $MBEDTLS_DIR
 
     for ABI in $ANDROID_ABIS; do
+        CMAKE_BUILD_DIR=$MBEDTLS_DIR/mbedtls_build_${ABI}
+        rm -rf ${CMAKE_BUILD_DIR}
+        mkdir -p ${CMAKE_BUILD_DIR}
+        cd ${CMAKE_BUILD_DIR}
 
-      CMAKE_BUILD_DIR=$MBEDTLS_DIR/mbedtls_build_${ABI}
-      rm -rf ${CMAKE_BUILD_DIR}
-      mkdir -p ${CMAKE_BUILD_DIR}
-      cd ${CMAKE_BUILD_DIR}
+        # Enable AES on arm64-v8a only
+        EXTRA_CFLAGS=""
+        if [ "$ABI" == "arm64-v8a" ]; then
+            EXTRA_CFLAGS="-march=armv8-a+crypto"
+        fi
 
-      ${CMAKE_EXECUTABLE} .. \
-       -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
-       -DANDROID_ABI=$ABI \
-       -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake \
-       -DCMAKE_INSTALL_PREFIX=$BUILD_DIR/external/$ABI \
-       -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384" \
-       -DENABLE_TESTING=0 \
-       -DCMAKE_C_FLAGS="-Wno-error=documentation" \
-       -DCMAKE_CXX_FLAGS="-Wno-error=documentation"
+        # Suppress documentation warnings being treated as errors
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -Wno-error=documentation"
 
-      make -j$JOBS
-      make install
+        ${CMAKE_EXECUTABLE} .. \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DANDROID_ABI=$ABI \
+            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake \
+            -DCMAKE_INSTALL_PREFIX=$BUILD_DIR/external/$ABI \
+            -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384" \
+            -DENABLE_TESTING=0 \
+            -DCMAKE_C_FLAGS="$EXTRA_CFLAGS"
 
+        make -j$JOBS
+        make install
     done
+
     popd
 }
 
