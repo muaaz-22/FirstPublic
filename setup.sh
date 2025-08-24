@@ -169,6 +169,8 @@ function buildMbedTLS() {
        -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake \
        -DCMAKE_INSTALL_PREFIX=$BUILD_DIR/external/$ABI \
        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384" \
+       -DCMAKE_C_FLAGS="-Wno-documentation -Wno-error" \
+       -DCMAKE_CXX_FLAGS="-Wno-documentation -Wno-error" \
        -DENABLE_TESTING=0
 
       make -j$JOBS
@@ -287,18 +289,18 @@ if [[ ! -d "$OUTPUT_DIR" && ! -d "$BUILD_DIR" ]]; then
     downloadMbedTLS
   fi
 
-  # # Download Vpx source code if it doesn't exist
-  # if [[ ! -d "$VPX_DIR" ]]; then
-  #   downloadLibVpx
-  # fi
+  # Download Vpx source code if it doesn't exist
+  if [[ ! -d "$VPX_DIR" ]]; then
+    downloadLibVpx
+  fi
 
-  # # Download Ffmpeg source code if it doesn't exist
-  # if [[ ! -d "$FFMPEG_DIR" ]]; then
-  #   downloadFfmpeg
-  # fi
+  # Download Ffmpeg source code if it doesn't exist
+  if [[ ! -d "$FFMPEG_DIR" ]]; then
+    downloadFfmpeg
+  fi
 
   # Building library
   buildMbedTLS
-  #buildLibVpx
-  #buildFfmpeg
+  buildLibVpx
+  buildFfmpeg
 fi
