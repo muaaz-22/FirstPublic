@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Versions
-VPX_VERSION=1.13.0
-MBEDTLS_VERSION=3.4.2
-FFMPEG_VERSION=6.0.1
+VPX_VERSION=1.15.2
+MBEDTLS_VERSION=3.6.4
+FFMPEG_VERSION=6.1.3
 
 # Directories
 BASE_DIR=$(cd "$(dirname "$0")" && pwd)
