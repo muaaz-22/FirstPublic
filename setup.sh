@@ -169,9 +169,9 @@ function buildMbedTLS() {
        -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake \
        -DCMAKE_INSTALL_PREFIX=$BUILD_DIR/external/$ABI \
        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384" \
-       -DCMAKE_C_FLAGS="-Wno-documentation -Wno-error" \
-       -DCMAKE_CXX_FLAGS="-Wno-documentation -Wno-error" \
-       -DENABLE_TESTING=0
+       -DENABLE_TESTING=0 \
+       -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-documentation -Wno-error" \
+       -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-documentation -Wno-error"
 
       make -j$JOBS
       make install
