@@ -46,13 +46,39 @@ jobs:
       - name: Install Libtool
         run: sudo apt-get install -y libtool
 
-      - name: Install Android NDK
+      - name: Install Android SDK + NDK + CMake
         run: |
-          ANDROID_NDK_VERSION=r27d
-          wget https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux.zip
-          unzip -q android-ndk-${ANDROID_NDK_VERSION}-linux.zip -d $HOME
-          mv $HOME/android-ndk-${ANDROID_NDK_VERSION} $HOME/android-ndk
-          echo "ANDROID_NDK_HOME=$HOME/android-ndk" >> $GITHUB_ENV
-          echo "$HOME/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_PATH
-          NDK_VERSION=$($HOME/android-ndk/ndk-build --version | awk '{print $3}')
-          echo "NDK ${NDK_VERSION} installed at: $HOME/android-ndk"
+          ANDROID_SDK_HOME=$HOME/android-sdk
+          mkdir -p $ANDROID_SDK_HOME
+          echo "ANDROID_SDK_HOME=$ANDROID_SDK_HOME" >> $GITHUB_ENV
+
+          # Download commandline tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q commandlinetools-linux-11076708_latest.zip -d $ANDROID_SDK_HOME/cmdline-tools
+          mv $ANDROID_SDK_HOME/cmdline-tools/cmdline-tools $ANDROID_SDK_HOME/cmdline-tools/latest
+
+          # Accept licenses
+          yes | $ANDROID_SDK_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+
+          # Define versions
+          ANDROID_CMAKE_VERSION=3.22.1
+          ANDROID_NDK_VERSION=27.2.12479018
+
+          # Install specific versions
+          $ANDROID_SDK_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;${ANDROID_CMAKE_VERSION}" "ndk;${ANDROID_NDK_VERSION}"
+
+          # Export env variables
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_HOME/ndk/${ANDROID_NDK_VERSION}" >> $GITHUB_ENV
+          echo "ANDROID_CMAKE_VERSION=${ANDROID_CMAKE_VERSION}" >> $GITHUB_ENV
+
+          # Add SDK CMake to PATH
+          echo "$ANDROID_SDK_HOME/cmake/${ANDROID_CMAKE_VERSION}/bin" >> $GITHUB_PATH
+
+      - name: Show SDK path
+        run: echo "SDK is at $ANDROID_SDK_HOME"
+
+      - name: Show NDK path
+        run: echo "NDK is at $ANDROID_NDK_HOME"
+
+      - name: Show CMake path
+        run: echo "CMake $ANDROID_CMAKE_VERSION is at $ANDROID_SDK_HOME/cmake/$ANDROID_CMAKE_VERSION/bin"
