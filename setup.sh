@@ -310,6 +310,6 @@ if [[ ! -d "$OUTPUT_DIR" && ! -d "$BUILD_DIR" ]]; then
 
   # Building library
   buildMbedTLS
-  #buildLibVpx
-  #buildFfmpeg
+  buildLibVpx
+  buildFfmpeg
 fi
